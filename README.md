@@ -31,10 +31,6 @@ Android API 至少为 21 （Android 5.0）
 
 ## 基础使用方法
 
-> ⚠ `setSwitcher()` 方法会覆盖原本的 `onTouch()` 与 `onClick()` 方法，如果需要点击事件，可以从构造器里调用，或者继承 CircularRevealSwitch 类重写相应的方法
->
-> ⚠ 本库只提供切换主题效果，不提供切换后主题的保存。如果你需要保存主题，希望下次启动软件或者打开新 Activity 时能应用到新主题，请自行储存并设置
-
 ### 日夜间切换
 
 #### Kotlin
@@ -142,3 +138,5 @@ builder.setSwitcher();
 - **不要**在 `onAnimStart` 和 `onAnimEnd` 相关回调中调用与当前 Activity 相关的组件，因为回调到这里时，旧 Activity 已经销毁，你对组件的任何操作基本都会失效，但你可以在这里执行一些 application 级操作。如果你需要在旧 Activity 未销毁之前执行其他任务，可以在 `onClick` 中执行
 - 建议至少是 ComponentActivity
 - 建议 API 大于等于 28（Android 9.0），因为操作依赖于 `Handler#post`，而 `ActivityCompat#recreate` 中 API 低于 28 会 Handler 套 Handler 再 recreate，放入主消息队列的顺序可能会不一样，动画可能失效，但其实一般不会失效
+- `setSwitcher()` 方法会覆盖原本的 `onTouch()` 与 `onClick()` 方法，如果需要点击事件，可以从构造器里调用，或者继承 CircularRevealSwitch 类重写相应的方法
+- 本库只提供切换主题效果，不提供切换后主题的保存。如果你需要保存主题，希望下次启动软件或者打开新 Activity 时能应用到新主题，请自行储存并设置

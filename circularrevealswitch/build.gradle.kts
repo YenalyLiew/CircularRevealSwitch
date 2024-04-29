@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    `maven-publish`
 }
 
 android {
@@ -36,6 +37,20 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+}
+
+afterEvaluate {
+    publishing {
+        val versionName = "0.1"
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                groupId = "com.yenaly.circularrevealswitch"
+                artifactId = "circularrevealswitch"
+                version = versionName
+            }
+        }
     }
 }
 
