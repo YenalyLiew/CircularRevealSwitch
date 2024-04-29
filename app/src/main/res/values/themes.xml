@@ -1,0 +1,65 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.CircularRevealSwitch" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <!-- Red Theme -->
+    <style name="Theme.CircularRevealSwitch.Red" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/red_500</item>
+        <item name="colorPrimaryVariant">@color/red_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/red_200</item>
+        <item name="colorSecondaryVariant">@color/red_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+    </style>
+
+    <!-- Yellow Theme -->
+    <style name="Theme.CircularRevealSwitch.Yellow" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/yellow_500</item>
+        <item name="colorPrimaryVariant">@color/yellow_700</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/yellow_200</item>
+        <item name="colorSecondaryVariant">@color/yellow_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+    </style>
+
+    <!-- Blue Theme -->
+    <style name="Theme.CircularRevealSwitch.Blue" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blue_500</item>
+        <item name="colorPrimaryVariant">@color/blue_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/blue_200</item>
+        <item name="colorSecondaryVariant">@color/blue_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+    </style>
+
+    <!-- Green Theme -->
+    <style name="Theme.CircularRevealSwitch.Green" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/green_500</item>
+        <item name="colorPrimaryVariant">@color/green_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/green_200</item>
+        <item name="colorSecondaryVariant">@color/green_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+    </style>
+
+
+    <style name="Theme.CircularRevealSwitch.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+
+    <style name="Theme.CircularRevealSwitch.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
+</resources>

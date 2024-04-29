@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSecondary">
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/defaultLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/defaultImageView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_color"
+                android:backgroundTint="?attr/colorPrimary" />
+
+            <RadioButton
+                android:id="@+id/defaultRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:minWidth="0dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/redLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/redImageView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_color"
+                android:backgroundTint="@color/red" />
+
+            <RadioButton
+                android:id="@+id/redRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:minWidth="0dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/yellowLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/yellowImageView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_color"
+                android:backgroundTint="@color/yellow" />
+
+            <RadioButton
+                android:id="@+id/yellowRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:minWidth="0dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blueLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/blueImageView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_color"
+                android:backgroundTint="@color/blue" />
+
+            <RadioButton
+                android:id="@+id/blueRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:minWidth="0dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/greenLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/greenImageView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_color"
+                android:backgroundTint="@color/green" />
+
+            <RadioButton
+                android:id="@+id/greenRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:minWidth="0dp" />
+        </LinearLayout>
+
+    </RadioGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
