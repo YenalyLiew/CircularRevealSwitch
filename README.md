@@ -1,10 +1,9 @@
-
-
 <h1 align="center">CircularRevealSwitch</h1>
+<h2 align="center">环形揭示切换</h2>
 
 <p align="center">
     <br>
-    <strong>只需至少一句代码实现 Telegram 揭露切换主题动画</strong>
+    <strong>只需至少一句代码实现 Telegram 环形揭示切换主题动画</strong>
     <br>
     <br>
     <img src="./docs/img/kt_example.png" width="500"/>
@@ -91,7 +90,7 @@ builder.setSwitcher();
 >
 > ```kotlin
 > override fun onCreate(savedInstanceState: Bundle?) {
-> 	when (sharedPrefs().getString("theme", "default")) {
+>     when (sharedPrefs().getString("theme", "default")) {
 >         "red" -> setTheme(R.style.Theme_CircularRevealSwitch_Red)
 >         "green" -> setTheme(R.style.Theme_CircularRevealSwitch_Green)
 >         "blue" -> setTheme(R.style.Theme_CircularRevealSwitch_Blue)
