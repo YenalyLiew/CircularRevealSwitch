@@ -19,7 +19,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url = URI.create("https://jitpack.io")
+            url = uri("https://jitpack.io")
         }
     }
 }

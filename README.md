@@ -12,6 +12,39 @@
     <img src="./docs/img/java_example.png" width="500"/>
 </p>
 
+<p align="center">
+    <img src="https://jitpack.io/v/YenalyLiew/CircularRevealSwitch.svg" />
+    <img src="https://img.shields.io/badge/language-kotlin-orange" />
+    <img src="https://img.shields.io/badge/license-MIT-blue" />
+</p>
+
+## 使用
+
+在 settings.gradle.kts 中添加 jitpack 仓库
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://jitpack.io")
+            // groovy:
+            // url 'https://jitpack.io'
+        }
+    }
+}
+```
+
+在你的模块下的 build.gradle.kts 中添加依赖
+
+```kotlin
+dependencies {
+    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.1")
+}
+```
+
 ## 使用效果
 
 | 日间到夜间                                       | 夜间到日间                                     | 切换至黄色主题                                     | 切换至红色主题                                  |
