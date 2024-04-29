@@ -1,7 +1,5 @@
 package com.yenaly.circularrevealswitch
 
-import android.view.View
-
 /**
  * Interface SwitchListener provides methods to handle animation events.
  */

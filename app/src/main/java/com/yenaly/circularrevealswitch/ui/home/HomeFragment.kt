@@ -5,13 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.lifecycle.ViewModelProvider
 import com.yenaly.circularrevealswitch.Prefs.getPref
 import com.yenaly.circularrevealswitch.Prefs.savePref
-import com.yenaly.circularrevealswitch.SwitchAnimation
 import com.yenaly.circularrevealswitch.demo.R
 import com.yenaly.circularrevealswitch.demo.databinding.FragmentHomeBinding
 import com.yenaly.circularrevealswitch.ext.setThemeSwitcher

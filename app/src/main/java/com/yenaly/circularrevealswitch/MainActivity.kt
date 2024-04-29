@@ -6,7 +6,6 @@ import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -18,10 +17,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.yenaly.circularrevealswitch.Prefs.getPref
 import com.yenaly.circularrevealswitch.Prefs.savePref
 import com.yenaly.circularrevealswitch.Prefs.sharedPrefs
+import com.yenaly.circularrevealswitch.demo.R
 import com.yenaly.circularrevealswitch.demo.databinding.ActivityMainBinding
 import com.yenaly.circularrevealswitch.ext.setDayNightModeSwitcher
-import com.yenaly.circularrevealswitch.demo.R
-import com.yenaly.circularrevealswitch.impl.ThemeCRSwitch
 
 class MainActivity : AppCompatActivity() {
 
