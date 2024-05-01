@@ -41,7 +41,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.1")
+    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.2")
 }
 ```
 
@@ -53,12 +53,13 @@ dependencies {
 
 ## 使用要求
 
-Android API 至少为 21 （Android 5.0）
+Android API 至少为 24 （Android 7.0）
+
+Android 7.0 以上才支持 DecorView 复用，而本库依赖复用 DecorView。
 
 ## 优势
 
 - [x] **无需自行嵌套、添加新 View**
-- [x] 使用合理不会造成内存泄漏
 - [x] 有一定拓展性，方法均为 `protected open`
 - [x] 实现最简单的日夜间切换动画只需要**一行代码**
 

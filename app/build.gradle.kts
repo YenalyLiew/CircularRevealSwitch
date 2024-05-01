@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "com.yenaly.circularrevealswitch"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = 2
+        versionName = "0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,5 +53,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    debugImplementation(libs.leak.canary)
+    // debugImplementation(libs.leak.canary)
 }

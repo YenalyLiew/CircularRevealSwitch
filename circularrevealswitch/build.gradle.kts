@@ -9,7 +9,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -42,7 +42,7 @@ android {
 
 afterEvaluate {
     publishing {
-        val versionName = "0.1"
+        val versionName = "0.2"
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])

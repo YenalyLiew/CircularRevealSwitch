@@ -3,7 +3,7 @@ package com.yenaly.circularrevealswitch
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.animation.Interpolator
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import com.yenaly.circularrevealswitch.interpolator.CubicBezierInterpolator
 
 /**
  * Abstract class CRSwitchBuilder is used to build a circular reveal animation.
@@ -18,10 +18,10 @@ abstract class CRSwitchBuilder<T : CRSwitchBuilder<T>>(@JvmField val view: View)
     var duration: Long = 400L
 
     /**
-     * The interpolator to be used for the animation. Default is FastOutSlowInInterpolator.
+     * The interpolator to be used for the animation. Default is EaseInOutQuad.
      */
     @JvmField
-    var interpolator: Interpolator = FastOutSlowInInterpolator()
+    var interpolator: Interpolator = CubicBezierInterpolator.EaseInOutQuad
 
     /**
      * The OnClickListener for the view. Default is null.

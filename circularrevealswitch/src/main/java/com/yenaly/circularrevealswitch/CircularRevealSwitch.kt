@@ -16,7 +16,6 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.Interpolator
 import android.widget.ImageView
-import androidx.activity.ComponentActivity
 import androidx.core.animation.addListener
 import androidx.core.view.children
 import androidx.core.view.drawToBitmap
@@ -42,9 +41,6 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
         const val TAG = "CircularRevealSwitch"
         internal const val DEBUG = BuildConfig.ENABLE_LOGGING
 
-        /**
-         *
-         */
         @JvmStatic
         protected var isViewClickable = true
     }
@@ -121,9 +117,9 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                         "decorView: $decorView"
             )
         }
-        val activityInstance = activity.get()!!
-        if (activityInstance is ComponentActivity) {
-            activityInstance.lifecycle.addObserver(this)
+        val context = context.get()!!
+        if (context is LifecycleOwner) {
+            context.lifecycle.addObserver(this)
         }
         view.get()!!.setOnTouchListener(this)
         view.get()!!.setOnClickListener(this)
@@ -167,6 +163,9 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      * @return ImageView
      */
     protected open fun createImageView(context: Context): ImageView {
+        if (DEBUG) {
+            Log.d(TAG, "createImageView")
+        }
         return ImageView(context).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -230,6 +229,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      * @param radius The radius of the circular reveal.
      */
     protected open fun animateExpand(iv: ImageView, screenshot: Bitmap, radius: Float) {
+        iv.setImageBitmap(screenshot)
         decorView.addView(iv, 0)
 
         if (DEBUG) {
@@ -238,9 +238,10 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             }
         }
 
-        decorView.isInvisible = true
+        val content = decorView.findViewById<View>(android.R.id.content)
+        content.isInvisible = true
         createExpandAnimator(
-            decorView,
+            content,
             x.toInt(), y.toInt(),
             0F, radius
         ).apply {
@@ -248,7 +249,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             duration = this@CircularRevealSwitch.duration
             addListener(onStart = {
                 isViewClickable = false
-                decorView.isInvisible = false
+                content.isInvisible = false
                 onExpandListener?.onAnimStart()
             }, onEnd = {
                 isViewClickable = true

@@ -43,10 +43,6 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        root.setThemeSwitcher(
-            toTheme = R.style.Theme_CircularRevealSwitch,
-        )
-
         binding.defaultLayout.setThemeSwitcher(R.style.Theme_CircularRevealSwitch) {
             activity?.window?.isAppearanceLightStatusBars = false
             it.context.savePref("theme", "default")
