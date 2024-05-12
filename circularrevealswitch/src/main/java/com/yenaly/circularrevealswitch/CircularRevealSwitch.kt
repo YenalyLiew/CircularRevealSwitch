@@ -3,14 +3,15 @@ package com.yenaly.circularrevealswitch
 import android.animation.Animator
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewAnimationUtils
 import android.view.ViewGroup
 import android.view.Window
@@ -18,6 +19,7 @@ import android.view.animation.Interpolator
 import android.widget.ImageView
 import androidx.core.animation.addListener
 import androidx.core.view.children
+import androidx.core.view.doOnAttach
 import androidx.core.view.drawToBitmap
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
@@ -35,7 +37,8 @@ import kotlin.math.hypot
  * @param crSwitchBuilder The builder object that contains the configuration for the circular reveal switch.
  */
 abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) :
-    View.OnTouchListener, OnClickListener, LifecycleEventObserver {
+    View.OnTouchListener, View.OnClickListener,
+    LifecycleEventObserver {
 
     companion object {
         const val TAG = "CircularRevealSwitch"
@@ -67,21 +70,24 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
     @JvmField
     protected val applicationContext: Context = context.get()!!.applicationContext
 
+    @JvmField
+    protected val application: Application = applicationContext as Application
+
     // The activity of the context
     @JvmField
-    protected val activity: WeakReference<Activity> = context.get()!!.activity.weak()
+    protected var activity: WeakReference<Activity> = context.get()!!.activity.weak()
 
     // The window of the activity
     @JvmField
-    protected val window: WeakReference<Window> = activity.get()!!.window.weak()
+    protected var window: Window = activity.get()!!.window
 
     // The decor view of the window
     @JvmField
-    protected val decorView: ViewGroup = window.get()!!.decorView as ViewGroup
+    protected var decorView: ViewGroup = window.decorView as ViewGroup
 
     // OnClickListener for the view
     @JvmField
-    protected var onClickListener: OnClickListener? = crSwitchBuilder.onClickListener
+    protected var onClickListener: View.OnClickListener? = crSwitchBuilder.onClickListener
 
     // Handler for the main looper
     @JvmField
@@ -113,7 +119,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             Log.d(
                 TAG, "init -> " +
                         "activity: ${activity.get()}, " +
-                        "window: ${window.get()}, " +
+                        "window: ${window}, " +
                         "decorView: $decorView"
             )
         }
@@ -127,6 +133,8 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
 
     override fun onClick(v: View) {
+        if (!isViewClickable) return
+        application.registerActivityLifecycleCallbacks(CRActivityLifecycleCallback)
         onClickListener?.onClick(v)
     }
 
@@ -191,34 +199,36 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             }
         }
 
-        createShrinkAnimator(
-            iv,
-            x.toInt(), y.toInt(),
-            radius, 0F
-        ).apply {
-            interpolator = this@CircularRevealSwitch.interpolator
-            duration = this@CircularRevealSwitch.duration
-            addListener(onStart = {
-                isViewClickable = false
-                onShrinkListener?.onAnimStart()
-            }, onEnd = {
-                isViewClickable = true
-                decorView.removeView(iv)
-                onShrinkListener?.onAnimEnd()
-                if (DEBUG) {
-                    Log.d(
-                        TAG, "shrink-end -> " +
-                                "activity: ${activity.get()}, " +
-                                "window: ${window.get()}, " +
-                                "decorView: $decorView"
-                    )
-                }
-            }, onCancel = {
-                isViewClickable = true
-                decorView.removeView(iv)
-                onShrinkListener?.onAnimCancel()
-            })
-        }.start()
+        iv.doOnAttach { view ->
+            createShrinkAnimator(
+                view,
+                x.toInt(), y.toInt(),
+                radius, 0F
+            ).apply {
+                interpolator = this@CircularRevealSwitch.interpolator
+                duration = this@CircularRevealSwitch.duration
+                addListener(onStart = {
+                    isViewClickable = false
+                    onShrinkListener?.onAnimStart()
+                }, onEnd = {
+                    isViewClickable = true
+                    decorView.removeView(view)
+                    onShrinkListener?.onAnimEnd()
+                    if (DEBUG) {
+                        Log.d(
+                            TAG, "shrink-end -> " +
+                                    "activity: ${activity.get()}, " +
+                                    "window: ${window}, " +
+                                    "decorView: $decorView"
+                        )
+                    }
+                }, onCancel = {
+                    isViewClickable = true
+                    decorView.removeView(view)
+                    onShrinkListener?.onAnimCancel()
+                })
+            }.start()
+        }
     }
 
     /**
@@ -240,35 +250,38 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
         val content = decorView.findViewById<View>(android.R.id.content)
         content.isInvisible = true
-        createExpandAnimator(
-            content,
-            x.toInt(), y.toInt(),
-            0F, radius
-        ).apply {
-            interpolator = this@CircularRevealSwitch.interpolator
-            duration = this@CircularRevealSwitch.duration
-            addListener(onStart = {
-                isViewClickable = false
-                content.isInvisible = false
-                onExpandListener?.onAnimStart()
-            }, onEnd = {
-                isViewClickable = true
-                decorView.removeView(iv)
-                onExpandListener?.onAnimEnd()
-                if (DEBUG) {
-                    Log.d(
-                        TAG, "expand-end -> " +
-                                "activity: ${activity.get()}, " +
-                                "window: ${window.get()}, " +
-                                "decorView: $decorView"
-                    )
-                }
-            }, onCancel = {
-                isViewClickable = true
-                decorView.removeView(iv)
-                onExpandListener?.onAnimCancel()
-            })
-        }.start()
+
+        content.doOnAttach { view ->
+            createExpandAnimator(
+                view,
+                x.toInt(), y.toInt(),
+                0F, radius
+            ).apply {
+                interpolator = this@CircularRevealSwitch.interpolator
+                duration = this@CircularRevealSwitch.duration
+                addListener(onStart = {
+                    isViewClickable = false
+                    view.isInvisible = false
+                    onExpandListener?.onAnimStart()
+                }, onEnd = {
+                    isViewClickable = true
+                    decorView.removeView(iv)
+                    onExpandListener?.onAnimEnd()
+                    if (DEBUG) {
+                        Log.d(
+                            TAG, "expand-end -> " +
+                                    "activity: ${activity.get()}, " +
+                                    "window: ${window}, " +
+                                    "decorView: $decorView"
+                        )
+                    }
+                }, onCancel = {
+                    isViewClickable = true
+                    decorView.removeView(iv)
+                    onExpandListener?.onAnimCancel()
+                })
+            }.start()
+        }
     }
 
     /**
@@ -283,7 +296,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             Log.d(
                 TAG, "calcRadius -> " +
                         "activity: ${activity.get()}, " +
-                        "window: ${window.get()}, " +
+                        "window: ${window}, " +
                         "decorView: $decorView"
             )
         }
@@ -345,6 +358,40 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             centerX, centerY,
             startRadius, endRadius
         )
+    }
+
+    /**
+     * This method is used to reassign the activity, window, and decorView.
+     * After each recreate, a new Activity instance is generated.
+     * By using ActivityLifecycleCallback, we can get the new Activity instance and reassign it,
+     * thus obtaining the information of the new Activity.
+     *
+     * Some device models do not support the reuse of DecorView,
+     * so this method can be seen as a compromise.
+     */
+    protected open fun reassignActivity() {
+        CRActivityLifecycleCallback.currentActivity?.let {
+            this.activity = it
+            this.window = activity.get()!!.window
+            this.decorView = window.decorView as ViewGroup
+        }
+        CRActivityLifecycleCallback.currentActivity = null
+    }
+
+    /**
+     * This method is used to post a Runnable to the Handler's message queue.
+     * It is a compatibility method to ensure that the Runnable is correctly executed in the message queue in order.
+     * ActivityCompat.recreate in API level 27 and below will have a double layer of handler post,
+     * so it needs to be wrapped twice to be correctly executed in the message queue in order.
+     *
+     * @param runnable The Runnable to be added to the message queue.
+     */
+    protected open fun Handler.postCompat(runnable: Runnable) {
+        if (Build.VERSION.SDK_INT >= 28) {
+            post(runnable)
+        } else {
+            post { post(runnable) }
+        }
     }
 
     /**

@@ -89,15 +89,15 @@ open class DayNightModeCRSwitch(builder: Builder) :
         if (DEBUG) {
             Log.d(TAG, "onDayNightModeClick")
         }
-        if (!isViewClickable) return
 
-        val screenshot = window.get()!!.screenshot()
+        val screenshot = window.screenshot()
         toNightMode = !isNightMode
 
         AppCompatDelegate.setDefaultNightMode(
             if (toNightMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
-        handler.post {
+        handler.postCompat {
+            reassignActivity()
             animateDayNightMode(screenshot)
         }
     }

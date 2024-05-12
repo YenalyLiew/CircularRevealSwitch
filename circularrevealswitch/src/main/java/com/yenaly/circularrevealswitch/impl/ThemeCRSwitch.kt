@@ -90,13 +90,12 @@ open class ThemeCRSwitch(builder: Builder) :
      * @param v The view that was clicked.
      */
     protected open fun onThemeClick(v: View) {
-        if (!isViewClickable) return
-
-        val screenshot = window.get()!!.screenshot()
+        val screenshot = window.screenshot()
         if (newTheme == toTheme) return
         newTheme = toTheme
         ActivityCompat.recreate(activity.get()!!)
-        handler.post {
+        handler.postCompat {
+            reassignActivity()
             animateTheme(screenshot)
         }
     }
