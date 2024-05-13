@@ -76,6 +76,7 @@ open class DayNightModeCRSwitch(builder: Builder) :
     }
 
     override fun onClick(v: View) {
+        if (!isViewClickable) return
         super.onClick(v)
         onDayNightModeClick(v)
     }
@@ -90,7 +91,7 @@ open class DayNightModeCRSwitch(builder: Builder) :
             Log.d(TAG, "onDayNightModeClick")
         }
 
-        val screenshot = window.screenshot()
+        val screenshot = window.takeScreenshotCompat()
         toNightMode = !isNightMode
 
         AppCompatDelegate.setDefaultNightMode(

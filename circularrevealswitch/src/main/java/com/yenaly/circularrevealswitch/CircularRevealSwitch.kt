@@ -8,9 +8,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
+import android.view.PixelCopy
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.ViewGroup
@@ -20,12 +22,13 @@ import android.widget.ImageView
 import androidx.core.animation.addListener
 import androidx.core.view.children
 import androidx.core.view.doOnAttach
-import androidx.core.view.drawToBitmap
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import java.lang.ref.WeakReference
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.math.hypot
 
 /**
@@ -133,7 +136,6 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
 
     override fun onClick(v: View) {
-        if (!isViewClickable) return
         application.registerActivityLifecycleCallbacks(CRActivityLifecycleCallback)
         onClickListener?.onClick(v)
     }
@@ -158,11 +160,65 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
     }
 
     /**
-     * This method takes a screenshot of the window.
+     * Takes a screenshot of the window using the PixelCopy API (available in Android O and above)
+     * or a traditional method (available in versions below Android O).
      *
-     * @return Bitmap
+     * The PixelCopy API is capable of capturing shadows and other visual effects of the view,
+     * while the traditional method cannot capture these effects.
+     *
+     * @return Bitmap Returns a screenshot of the window.
      */
-    protected open fun Window.screenshot() = decorView.rootView.drawToBitmap()
+    protected open fun Window.takeScreenshotCompat(): Bitmap {
+        val root = decorView.rootView
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+            val thread = HandlerThread("Screenshot")
+            thread.start()
+            var isSuccess = false
+            try {
+                val latch = CountDownLatch(1)
+                var time = System.currentTimeMillis()
+                PixelCopy.request(this, bitmap, { copyResult ->
+                    isSuccess = copyResult == PixelCopy.SUCCESS
+                    latch.countDown()
+                }, Handler(thread.looper))
+                isSuccess = latch.await(1000, TimeUnit.MILLISECONDS) && isSuccess
+                time = System.currentTimeMillis() - time
+                if (isSuccess) {
+                    if (DEBUG) {
+                        Log.d(TAG, "take screenshot by PixelCopy, time: $time ms")
+                    }
+                    return bitmap
+                }
+                return takeScreenshot()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return takeScreenshot()
+            } finally {
+                thread.quit()
+            }
+        }
+        return takeScreenshot()
+    }
+
+    /**
+     * Takes a screenshot of the window using a traditional method.
+     *
+     * This method cannot capture shadows and other visual effects of the view.
+     *
+     * @return Bitmap Returns a screenshot of the window.
+     */
+    @Suppress("DEPRECATION")
+    protected open fun Window.takeScreenshot(): Bitmap {
+        if (DEBUG) {
+            Log.d(TAG, "take screenshot by default")
+        }
+        val root = decorView.rootView
+        root.isDrawingCacheEnabled = true
+        val bitmap = Bitmap.createBitmap(root.drawingCache)
+        root.isDrawingCacheEnabled = false
+        return bitmap
+    }
 
     /**
      * This method creates an ImageView with match_parent layout parameters.
@@ -387,7 +443,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      * @param runnable The Runnable to be added to the message queue.
      */
     protected open fun Handler.postCompat(runnable: Runnable) {
-        if (Build.VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             post(runnable)
         } else {
             post { post(runnable) }

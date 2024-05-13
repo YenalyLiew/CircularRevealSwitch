@@ -1,3 +1,7 @@
+<p>
+    中文 | <a href="./README_EN.md">English</a>
+</p>
+
 <h1 align="center">CircularRevealSwitch</h1>
 <h2 align="center">环形揭示切换</h2>
 
@@ -41,7 +45,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.3")
+    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4")
 }
 ```
 
@@ -177,7 +181,15 @@ builder.setSwitcher();
 
 ## 更新
 
+### v0.4
+
+1. 在 API 26 以上使用 PixelCopy 进行屏幕截图，能保留阴影等效果
+
+   删除 `screenshot()` 方法，替换为 `takeScreenshotCompat()`
+
+2. 修复 `isViewClickable` 逻辑不起作用的问题
+
 ### v0.3
 
 1. 修复 #1：部分手机不能立即 attach view 从而导致无法启动动画的问题
-2. API 小于 28 时动画不能显示的问题
+2. 修复 API 小于 28 时动画不能显示的问题

@@ -80,6 +80,7 @@ open class ThemeCRSwitch(builder: Builder) :
     }
 
     override fun onClick(v: View) {
+        if (!isViewClickable) return
         super.onClick(v)
         onThemeClick(v)
     }
@@ -90,7 +91,7 @@ open class ThemeCRSwitch(builder: Builder) :
      * @param v The view that was clicked.
      */
     protected open fun onThemeClick(v: View) {
-        val screenshot = window.screenshot()
+        val screenshot = window.takeScreenshotCompat()
         if (newTheme == toTheme) return
         newTheme = toTheme
         ActivityCompat.recreate(activity.get()!!)
