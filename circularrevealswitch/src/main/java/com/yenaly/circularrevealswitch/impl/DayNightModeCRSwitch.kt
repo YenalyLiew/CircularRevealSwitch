@@ -99,6 +99,9 @@ open class DayNightModeCRSwitch(builder: Builder) :
         )
         handler.postCompat {
             reassignActivity()
+            if (DEBUG) {
+                Log.d(TAG, "post_time: ${System.currentTimeMillis() - beforeStartTime} ms")
+            }
             animateDayNightMode(screenshot)
         }
     }

@@ -45,7 +45,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4")
+    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4.5")
 }
 ```
 
@@ -180,6 +180,10 @@ builder.setSwitcher();
 - 本库只提供切换主题效果，不提供切换后主题的保存。如果你需要保存主题，希望下次启动软件或者打开新 Activity 时能应用到新主题，请自行储存并设置
 
 ## 更新
+
+### v0.4.5
+
+1. 修复多 Activity 下，日间夜间切换动画无法正常播放的问题
 
 ### v0.4
 

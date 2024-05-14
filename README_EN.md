@@ -44,7 +44,7 @@ Add dependency in your module's build.gradle.kts
 
 ```kotlin
 dependencies {
-    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4")
+    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4.5")
 }
 ```
 
@@ -163,6 +163,10 @@ builder.setSwitcher();
 - This library only provides theme switching effects and does not handle theme persistence. If you need to save the theme for the next launch or opening of a new Activity, handle it yourself using SharedPreferences or other libraries.
 
 ## Updates
+
+### v0.4.5
+
+1. Fixed the issue where the day-night switch animation cannot play normally under multiple Activities
 
 ### v0.4
 

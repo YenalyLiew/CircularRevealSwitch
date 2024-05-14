@@ -2,6 +2,7 @@ package com.yenaly.circularrevealswitch.impl
 
 import android.app.Activity
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.View
 import androidx.annotation.StyleRes
 import androidx.core.app.ActivityCompat
@@ -97,6 +98,9 @@ open class ThemeCRSwitch(builder: Builder) :
         ActivityCompat.recreate(activity.get()!!)
         handler.postCompat {
             reassignActivity()
+            if (DEBUG) {
+                Log.d(TAG, "post_time: ${System.currentTimeMillis() - beforeStartTime} ms")
+            }
             animateTheme(screenshot)
         }
     }

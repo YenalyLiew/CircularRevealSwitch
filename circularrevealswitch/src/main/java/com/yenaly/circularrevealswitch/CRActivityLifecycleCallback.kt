@@ -18,16 +18,22 @@ import java.lang.ref.WeakReference
  * To ensure compatibility, we use ActivityLifecycleCallback to get the new activity
  * and obtain the new DecorView.
  */
-object CRActivityLifecycleCallback : Application.ActivityLifecycleCallbacks {
+class CRActivityLifecycleCallback(private val activityName: String) :
+    Application.ActivityLifecycleCallbacks {
 
-    var currentActivity: WeakReference<Activity>? = null
+    companion object {
+        const val TAG = "CRActivityLifecycleCallback"
+        var currentActivity: WeakReference<Activity>? = null
+    }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        activity.application.unregisterActivityLifecycleCallbacks(this)
         if (BuildConfig.ENABLE_LOGGING) {
-            Log.d("CRActivityLifecycleCallback", "onActivityCreated: $activity")
+            Log.d(TAG, "onActivityCreated: $activity")
         }
-        currentActivity = activity.weak()
+        if (activityName == activity.javaClass.name) {
+            activity.application.unregisterActivityLifecycleCallbacks(this)
+            currentActivity = activity.weak()
+        }
     }
 
     override fun onActivityStarted(activity: Activity) = Unit
@@ -42,8 +48,7 @@ object CRActivityLifecycleCallback : Application.ActivityLifecycleCallbacks {
 
     override fun onActivityDestroyed(activity: Activity) {
         if (BuildConfig.ENABLE_LOGGING) {
-            Log.d("CRActivityLifecycleCallback", "onActivityDestroyed: $activity")
+            Log.d(TAG, "onActivityDestroyed: $activity")
         }
-        currentActivity?.clear()
     }
 }

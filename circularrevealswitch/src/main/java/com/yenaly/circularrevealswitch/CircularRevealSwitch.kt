@@ -80,6 +80,10 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
     @JvmField
     protected var activity: WeakReference<Activity> = context.get()!!.activity.weak()
 
+    // The name of the activity
+    @JvmField
+    protected var activityName: String = activity.get()!!.javaClass.name
+
     // The window of the activity
     @JvmField
     protected var window: Window = activity.get()!!.window
@@ -114,6 +118,9 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
     @JvmField
     protected var locationInWindow = IntArray(2)
 
+    @JvmField
+    internal var beforeStartTime = 0L
+
     /**
      * This method sets the switcher for the circular reveal animation.
      */
@@ -136,7 +143,8 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
 
     override fun onClick(v: View) {
-        application.registerActivityLifecycleCallbacks(CRActivityLifecycleCallback)
+        if (DEBUG) beforeStartTime = System.currentTimeMillis()
+        application.registerActivityLifecycleCallbacks(CRActivityLifecycleCallback(activityName))
         onClickListener?.onClick(v)
     }
 
@@ -210,13 +218,15 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      */
     @Suppress("DEPRECATION")
     protected open fun Window.takeScreenshot(): Bitmap {
-        if (DEBUG) {
-            Log.d(TAG, "take screenshot by default")
-        }
         val root = decorView.rootView
+        var time = System.currentTimeMillis()
         root.isDrawingCacheEnabled = true
         val bitmap = Bitmap.createBitmap(root.drawingCache)
         root.isDrawingCacheEnabled = false
+        time = System.currentTimeMillis() - time
+        if (DEBUG) {
+            Log.d(TAG, "take screenshot by default, time: $time ms")
+        }
         return bitmap
     }
 
@@ -266,6 +276,10 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                 addListener(onStart = {
                     isViewClickable = false
                     onShrinkListener?.onAnimStart()
+                    if (DEBUG) {
+                        beforeStartTime = System.currentTimeMillis() - beforeStartTime
+                        Log.d(TAG, "beforeStartTime: $beforeStartTime ms")
+                    }
                 }, onEnd = {
                     isViewClickable = true
                     decorView.removeView(view)
@@ -308,6 +322,9 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
         content.isInvisible = true
 
         content.doOnAttach { view ->
+            if (DEBUG) {
+                Log.d(TAG, "attach_time: ${System.currentTimeMillis() - beforeStartTime} ms")
+            }
             createExpandAnimator(
                 view,
                 x.toInt(), y.toInt(),
@@ -319,6 +336,9 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                     isViewClickable = false
                     view.isInvisible = false
                     onExpandListener?.onAnimStart()
+                    if (DEBUG) {
+                        Log.d(TAG, "start_time: ${System.currentTimeMillis() - beforeStartTime} ms")
+                    }
                 }, onEnd = {
                     isViewClickable = true
                     decorView.removeView(iv)
