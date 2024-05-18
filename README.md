@@ -45,7 +45,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4.5")
+    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4.6")
 }
 ```
 
@@ -180,6 +180,16 @@ builder.setSwitcher();
 - 本库只提供切换主题效果，不提供切换后主题的保存。如果你需要保存主题，希望下次启动软件或者打开新 Activity 时能应用到新主题，请自行储存并设置
 
 ## 更新
+
+### v0.4.6
+
+1. 使用 PixelCopyCompat，可使在 API 小于 26 时使用先进的 PixelCopy。虽然使用了反射调用，但整体速度还是比 `View#getDrawingCache()` 快不少
+
+   图上部分为 PixelCopy 在 API 24 时的表现（平均耗时 40ms 左右），图下部分为 `View#getDrawingCache()` 的表现（平均耗时 60-70ms 左右）
+
+   ![](./docs/img/pixelcopy_android_7.png)
+
+2. `takeScreenshot()` 方法实现由 `View#getDrawingCache()` 修改为 `View#drawToBitmap()`，速度快一倍以上（平均耗时 30ms 左右）
 
 ### v0.4.5
 

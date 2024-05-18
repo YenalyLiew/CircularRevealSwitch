@@ -42,7 +42,7 @@ android {
 
 afterEvaluate {
     publishing {
-        val versionName = "0.4.5"
+        val versionName = "0.4.6"
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])

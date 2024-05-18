@@ -22,6 +22,7 @@ import android.widget.ImageView
 import androidx.core.animation.addListener
 import androidx.core.view.children
 import androidx.core.view.doOnAttach
+import androidx.core.view.drawToBitmap
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -178,35 +179,32 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      */
     protected open fun Window.takeScreenshotCompat(): Bitmap {
         val root = decorView.rootView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val thread = HandlerThread("Screenshot")
+        try {
             val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
-            val thread = HandlerThread("Screenshot")
             thread.start()
             var isSuccess = false
-            try {
-                val latch = CountDownLatch(1)
-                var time = System.currentTimeMillis()
-                PixelCopy.request(this, bitmap, { copyResult ->
-                    isSuccess = copyResult == PixelCopy.SUCCESS
-                    latch.countDown()
-                }, Handler(thread.looper))
-                isSuccess = latch.await(1000, TimeUnit.MILLISECONDS) && isSuccess
-                time = System.currentTimeMillis() - time
-                if (isSuccess) {
-                    if (DEBUG) {
-                        Log.d(TAG, "take screenshot by PixelCopy, time: $time ms")
-                    }
-                    return bitmap
+            val latch = CountDownLatch(1)
+            var time = System.currentTimeMillis()
+            PixelCopyCompat.request(this, bitmap, { copyResult ->
+                isSuccess = copyResult == PixelCopy.SUCCESS
+                latch.countDown()
+            }, Handler(thread.looper))
+            isSuccess = latch.await(1000, TimeUnit.MILLISECONDS) && isSuccess
+            time = System.currentTimeMillis() - time
+            if (isSuccess) {
+                if (DEBUG) {
+                    Log.d(TAG, "take screenshot by PixelCopy, time: $time ms")
                 }
-                return takeScreenshot()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return takeScreenshot()
-            } finally {
-                thread.quit()
+                return bitmap
             }
+            return takeScreenshot()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return takeScreenshot()
+        } finally {
+            thread.quit()
         }
-        return takeScreenshot()
     }
 
     /**
@@ -216,13 +214,10 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      *
      * @return Bitmap Returns a screenshot of the window.
      */
-    @Suppress("DEPRECATION")
     protected open fun Window.takeScreenshot(): Bitmap {
         val root = decorView.rootView
         var time = System.currentTimeMillis()
-        root.isDrawingCacheEnabled = true
-        val bitmap = Bitmap.createBitmap(root.drawingCache)
-        root.isDrawingCacheEnabled = false
+        val bitmap = root.drawToBitmap()
         time = System.currentTimeMillis() - time
         if (DEBUG) {
             Log.d(TAG, "take screenshot by default, time: $time ms")

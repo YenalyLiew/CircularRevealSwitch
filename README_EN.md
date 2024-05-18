@@ -44,7 +44,7 @@ Add dependency in your module's build.gradle.kts
 
 ```kotlin
 dependencies {
-    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4.5")
+    implementation("com.github.YenalyLiew:CircularRevealSwitch:0.4.6")
 }
 ```
 
@@ -163,6 +163,16 @@ builder.setSwitcher();
 - This library only provides theme switching effects and does not handle theme persistence. If you need to save the theme for the next launch or opening of a new Activity, handle it yourself using SharedPreferences or other libraries.
 
 ## Updates
+
+### v0.4.6
+
+1. Using PixelCopyCompat allows for the use of advanced PixelCopy when the API is less than 26. Although reflection calls are used, the overall speed is still much faster than `View#getDrawingCache()`.
+
+   The top part of the image shows the performance of PixelCopy at API 24 (average time consumption around 40ms), while the bottom part shows the performance of `View#getDrawingCache()` (average time consumption around 60-70ms).
+
+   ![](./docs/img/pixelcopy_android_7.png)
+
+2. The implementation of the `takeScreenshot()` method has been changed from `View#getDrawingCache()` to `View#drawToBitmap()`, which is more than twice as fast (average time consumption around 30ms).
 
 ### v0.4.5
 
