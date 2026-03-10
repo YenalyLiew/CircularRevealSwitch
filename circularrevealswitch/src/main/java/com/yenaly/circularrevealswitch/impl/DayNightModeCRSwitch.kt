@@ -87,23 +87,26 @@ open class DayNightModeCRSwitch(builder: Builder) :
      * @param v The view that was clicked.
      */
     protected open fun onDayNightModeClick(v: View) {
+        val targetNightMode = !isNightMode
+        if (isNightMode == targetNightMode) return
+
         if (DEBUG) {
             Log.d(TAG, "onDayNightModeClick")
         }
 
         val screenshot = window.takeScreenshotCompat()
-        toNightMode = !isNightMode
+        toNightMode = targetNightMode
+
+        runAfterRecreate {
+            if (DEBUG) {
+                Log.d(TAG, "Animation task executed after Activity recreation matched.")
+            }
+            animateDayNightMode(screenshot)
+        }
 
         AppCompatDelegate.setDefaultNightMode(
             if (toNightMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
-        handler.postCompat {
-            reassignActivity()
-            if (DEBUG) {
-                Log.d(TAG, "post_time: ${System.currentTimeMillis() - beforeStartTime} ms")
-            }
-            animateDayNightMode(screenshot)
-        }
     }
 
     /**

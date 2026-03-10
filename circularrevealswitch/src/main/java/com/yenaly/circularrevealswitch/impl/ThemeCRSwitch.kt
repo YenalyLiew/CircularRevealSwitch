@@ -95,14 +95,15 @@ open class ThemeCRSwitch(builder: Builder) :
         val screenshot = window.takeScreenshotCompat()
         if (newTheme == toTheme) return
         newTheme = toTheme
-        ActivityCompat.recreate(activity.get()!!)
-        handler.postCompat {
-            reassignActivity()
+
+        runAfterRecreate {
             if (DEBUG) {
-                Log.d(TAG, "post_time: ${System.currentTimeMillis() - beforeStartTime} ms")
+                Log.d(TAG, "Animation triggered after matched recreation")
             }
             animateTheme(screenshot)
         }
+
+        ActivityCompat.recreate(activity.get()!!)
     }
 
     /**

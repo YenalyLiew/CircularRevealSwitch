@@ -28,6 +28,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import java.lang.ref.WeakReference
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.hypot
@@ -46,6 +47,10 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
     companion object {
         const val TAG = "CircularRevealSwitch"
+
+        internal const val KEY_RECREATE_UUID = "cr_recreate_uuid"
+
+        @Suppress("KotlinConstantConditions")
         internal const val DEBUG = BuildConfig.ENABLE_LOGGING
 
         @JvmStatic
@@ -145,8 +150,26 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
     override fun onClick(v: View) {
         if (DEBUG) beforeStartTime = System.currentTimeMillis()
-        application.registerActivityLifecycleCallbacks(CRActivityLifecycleCallback(activityName))
         onClickListener?.onClick(v)
+    }
+
+    protected fun runAfterRecreate(task: () -> Unit) {
+        val currentAct = activity.get() ?: return
+        val taskUuid = UUID.randomUUID().toString()
+        currentAct.intent.putExtra(KEY_RECREATE_UUID, taskUuid)
+        application.registerActivityLifecycleCallbacks(
+            CRActivityLifecycleCallback(activityName, taskUuid) { newActivity ->
+                this.activity = newActivity.weak()
+                this.window = newActivity.window
+                this.decorView = newActivity.window.decorView as ViewGroup
+                if (DEBUG) {
+                    Log.d(TAG, "Fields reassigned for new Activity instance with UUID: $taskUuid")
+                }
+                handler.postCompat {
+                    task()
+                }
+            }
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -429,24 +452,6 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             centerX, centerY,
             startRadius, endRadius
         )
-    }
-
-    /**
-     * This method is used to reassign the activity, window, and decorView.
-     * After each recreate, a new Activity instance is generated.
-     * By using ActivityLifecycleCallback, we can get the new Activity instance and reassign it,
-     * thus obtaining the information of the new Activity.
-     *
-     * Some device models do not support the reuse of DecorView,
-     * so this method can be seen as a compromise.
-     */
-    protected open fun reassignActivity() {
-        CRActivityLifecycleCallback.currentActivity?.let {
-            this.activity = it
-            this.window = activity.get()!!.window
-            this.decorView = window.decorView as ViewGroup
-        }
-        CRActivityLifecycleCallback.currentActivity = null
     }
 
     /**

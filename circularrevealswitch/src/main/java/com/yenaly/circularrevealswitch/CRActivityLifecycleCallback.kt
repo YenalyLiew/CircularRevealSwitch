@@ -2,6 +2,7 @@ package com.yenaly.circularrevealswitch
 
 import android.app.Activity
 import android.app.Application
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import java.lang.ref.WeakReference
@@ -18,21 +19,28 @@ import java.lang.ref.WeakReference
  * To ensure compatibility, we use ActivityLifecycleCallback to get the new activity
  * and obtain the new DecorView.
  */
-class CRActivityLifecycleCallback(private val activityName: String) :
-    Application.ActivityLifecycleCallbacks {
+class CRActivityLifecycleCallback(
+    private val activityName: String,
+    private val targetUuid: String,
+    private val onMatched: (Activity) -> Unit
+) : Application.ActivityLifecycleCallbacks {
 
     companion object {
         const val TAG = "CRActivityLifecycleCallback"
-        var currentActivity: WeakReference<Activity>? = null
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        val intentUuid = activity.intent.getStringExtra(CircularRevealSwitch.KEY_RECREATE_UUID)
         if (BuildConfig.ENABLE_LOGGING) {
-            Log.d(TAG, "onActivityCreated: $activity")
+            Log.d(TAG, "onActivityCreated: $activity, received uuid: $intentUuid")
         }
-        if (activityName == activity.javaClass.name) {
+        if (activityName == activity.javaClass.name && intentUuid == targetUuid) {
+            if (BuildConfig.ENABLE_LOGGING) {
+                Log.d(TAG, "Activity matched successfully!")
+            }
+            activity.intent.removeExtra(CircularRevealSwitch.KEY_RECREATE_UUID)
             activity.application.unregisterActivityLifecycleCallbacks(this)
-            currentActivity = activity.weak()
+            onMatched(activity)
         }
     }
 
