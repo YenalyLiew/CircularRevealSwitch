@@ -20,20 +20,20 @@ import android.view.Window
 import android.view.animation.Interpolator
 import android.widget.ImageView
 import androidx.core.animation.addListener
+import androidx.core.graphics.createBitmap
 import androidx.core.view.children
-import androidx.core.view.doOnAttach
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.drawToBitmap
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.Runnable
 import java.lang.ref.WeakReference
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.hypot
-import androidx.core.graphics.createBitmap
-import kotlinx.coroutines.Runnable
 
 /**
  * This class is used to create a circular reveal switch animation.
@@ -173,9 +173,8 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                 if (DEBUG) {
                     Log.d(TAG, "Fields reassigned for new Activity instance with UUID: $taskUuid")
                 }
-                handler.postCompat {
-                    task()
-                }
+
+                task()
             }
         )
     }
@@ -280,13 +279,13 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      *
      * @param iv The ImageView to perform the animation on.
      * @param screenshot The screenshot to set as the bitmap of the ImageView.
-     * @param radius The radius of the circular reveal.
      */
-    protected open fun animateShrink(iv: ImageView, screenshot: Bitmap, radius: Float) {
+    protected open fun animateShrink(iv: ImageView, screenshot: Bitmap) {
         iv.setImageBitmap(screenshot)
 
         val contentIndex = decorView.indexOfChildById(android.R.id.content)
-        decorView.addView(iv, contentIndex + 1)
+        val insertIndex = if (contentIndex >= 0) contentIndex + 1 else decorView.childCount
+        decorView.addView(iv, insertIndex)
 
 
         if (DEBUG) {
@@ -295,12 +294,9 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             }
         }
 
-        iv.doOnAttach { view ->
-            createShrinkAnimator(
-                view,
-                x.toInt(), y.toInt(),
-                radius, 0F
-            ).apply {
+        decorView.doOnPreDraw {
+            val radius = calcRadius(x, y)
+            createShrinkAnimator(iv, x.toInt(), y.toInt(), radius, 0F).apply {
                 interpolator = this@CircularRevealSwitch.interpolator
                 duration = this@CircularRevealSwitch.duration
                 addListener(onStart = {
@@ -312,7 +308,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                     }
                 }, onEnd = {
                     isViewClickable = true
-                    decorView.removeView(view)
+                    decorView.removeView(iv)
                     onShrinkListener?.onAnimEnd()
                     if (DEBUG) {
                         Log.d(
@@ -324,7 +320,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                     }
                 }, onCancel = {
                     isViewClickable = true
-                    decorView.removeView(view)
+                    decorView.removeView(iv)
                     onShrinkListener?.onAnimCancel()
                 })
             }.start()
@@ -336,14 +332,22 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      *
      * @param iv The ImageView to perform the animation on.
      * @param screenshot The screenshot to set as the bitmap of the ImageView.
-     * @param radius The radius of the circular reveal.
      */
-    protected open fun animateExpand(iv: ImageView, screenshot: Bitmap, radius: Float) {
+    protected open fun animateExpand(iv: ImageView, screenshot: Bitmap) {
         iv.setImageBitmap(screenshot)
 
-        val content = decorView.findViewById<View>(android.R.id.content)
-        val contentIndex = decorView.indexOfChild(content)
-        decorView.addView(iv, contentIndex)
+        val contentView = decorView.findViewById<View>(android.R.id.content)
+        val contentIndex = decorView.indexOfChild(contentView)
+        val insertIndex = if (contentIndex >= 0) contentIndex else 0
+        decorView.addView(iv, insertIndex)
+        contentView.isInvisible = true
+
+        val originalBackground = contentView.background
+        var needsBgRestore = false
+        if (originalBackground == null) {
+            contentView.background = decorView.background
+            needsBgRestore = true
+        }
 
         if (DEBUG) {
             decorView.children.forEach {
@@ -353,29 +357,22 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
         val watchdog = Runnable {
             if (DEBUG) Log.e(TAG, "Expand animation watchdog triggered! Forcing visibility.")
-            content.isInvisible = false
+            contentView.isInvisible = false
+            if (needsBgRestore) contentView.background = null
             if (iv.parent != null) decorView.removeView(iv)
             isViewClickable = true
         }
         this.expandWatchdog = watchdog
-
-        content.isInvisible = true
         handler.postDelayed(watchdog, duration + 500)
 
-        content.doOnAttach { view ->
-            if (DEBUG) {
-                Log.d(TAG, "attach_time: ${System.currentTimeMillis() - beforeStartTime} ms")
-            }
-            createExpandAnimator(
-                view,
-                x.toInt(), y.toInt(),
-                0F, radius
-            ).apply {
+        decorView.doOnPreDraw {
+            val radius = calcRadius(x, y)
+            createExpandAnimator(contentView, x.toInt(), y.toInt(), 0F, radius).apply {
                 interpolator = this@CircularRevealSwitch.interpolator
                 duration = this@CircularRevealSwitch.duration
                 addListener(onStart = {
                     handler.removeCallbacks(watchdog)
-                    view.isInvisible = false
+                    contentView.isInvisible = false
                     isViewClickable = false
                     onExpandListener?.onAnimStart()
                     if (DEBUG) {
@@ -384,6 +381,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                 }, onEnd = {
                     handler.removeCallbacks(watchdog)
                     isViewClickable = true
+                    if (needsBgRestore) contentView.background = null
                     decorView.removeView(iv)
                     onExpandListener?.onAnimEnd()
                     if (DEBUG) {
@@ -396,7 +394,8 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                     }
                 }, onCancel = {
                     handler.removeCallbacks(watchdog)
-                    view.isInvisible = false
+                    contentView.isInvisible = false
+                    if (needsBgRestore) contentView.background = null
                     isViewClickable = true
                     decorView.removeView(iv)
                     onExpandListener?.onAnimCancel()

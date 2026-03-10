@@ -113,12 +113,11 @@ open class ThemeCRSwitch(builder: Builder) :
      */
     protected open fun animateTheme(screenshot: Bitmap) {
         val iv = createImageView(activity.get() ?: applicationContext)
-        val radius = calcRadius(x, y)
 
         if (animToTheme === SwitchAnimation.SHRINK) {
-            animateShrink(iv, screenshot, radius)
+            animateShrink(iv, screenshot)
         } else {
-            animateExpand(iv, screenshot, radius)
+            animateExpand(iv, screenshot)
         }
     }
 
