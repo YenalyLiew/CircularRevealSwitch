@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -13,7 +14,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
-import com.google.android.material.snackbar.Snackbar
 import com.yenaly.circularrevealswitch.Prefs.getPref
 import com.yenaly.circularrevealswitch.Prefs.savePref
 import com.yenaly.circularrevealswitch.Prefs.sharedPrefs
@@ -57,10 +57,8 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appbarMain.toolbar)
 
-        binding.appbarMain.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
+        binding.appbarMain.fab.setOnClickListener { _ ->
+            ActivityCompat.recreate(this)
         }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView

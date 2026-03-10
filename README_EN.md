@@ -155,6 +155,7 @@ builder.setSwitcher();
 
 ## ⚠ Notes
 
+- Android 11 (API 30) may have issues because `Activity#recreate` can cause a flicker on that OS version.
 - This library heavily relies on `ActivityCompat#recreate` method. If your Activity changes its Views upon recreation, it might affect the user experience.
 - **Avoid** performing actions related to the current Activity in `onAnimStart` and `onAnimEnd` callbacks because at that point, the old Activity is already destroyed, and any operations on components might be ineffective. However, you can execute some application-level tasks here. If you need to perform other tasks before the old Activity is destroyed, you can do so in `onClick`.
 - ComponentActivity or higher is recommended.
@@ -163,6 +164,10 @@ builder.setSwitcher();
 - This library only provides theme switching effects and does not handle theme persistence. If you need to save the theme for the next launch or opening of a new Activity, handle it yourself using SharedPreferences or other libraries.
 
 ## Updates
+
+### v0.5
+
+1. Modified some implementations for improved stability.
 
 ### v0.4.6
 

@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.yenaly.circularrevealswitch"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
@@ -42,7 +42,7 @@ android {
 
 afterEvaluate {
     publishing {
-        val versionName = "0.4.6"
+        val versionName = "0.5"
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])

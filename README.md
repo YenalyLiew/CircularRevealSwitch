@@ -172,6 +172,7 @@ builder.setSwitcher();
 
 ## ⚠ 使用注意
 
+- Android 11（API 30）使用会有问题，因为 `Activity#recreate` 在该系统版本会有闪屏现象。
 - 本库强依赖 `ActivityCompat#recreate` 方法，如果你的 Activity 在重建后 View 改变，可能会影响观感
 - **不要**在 `onAnimStart` 和 `onAnimEnd` 相关回调中调用与当前 Activity 相关的组件，因为回调到这里时，旧 Activity 已经销毁，你对组件的任何操作基本都会失效，但你可以在这里执行一些 application 级操作。如果你需要在旧 Activity 未销毁之前执行其他任务，可以在 `onClick` 中执行
 - 建议至少是 ComponentActivity
@@ -180,6 +181,10 @@ builder.setSwitcher();
 - 本库只提供切换主题效果，不提供切换后主题的保存。如果你需要保存主题，希望下次启动软件或者打开新 Activity 时能应用到新主题，请自行储存并设置
 
 ## 更新
+
+### v0.5
+
+1. 修改了一些实现方式，稳定性更高一点。
 
 ### v0.4.6
 
