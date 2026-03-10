@@ -5,6 +5,7 @@ package com.yenaly.circularrevealswitch
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.view.ViewGroup
 import android.view.Window
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowInsetsControllerCompat
@@ -67,3 +68,16 @@ var Window.isAppearanceLightStatusBars: Boolean
         val wic = WindowInsetsControllerCompat(this, decorView)
         return wic.isAppearanceLightStatusBars
     }
+
+/**
+ * Find the index of a direct child by its ID in a single pass.
+ * Returns -1 if not found.
+ */
+fun ViewGroup.indexOfChildById(id: Int): Int {
+    for (i in 0 until childCount) {
+        if (getChildAt(i).id == id) {
+            return i
+        }
+    }
+    return -1
+}

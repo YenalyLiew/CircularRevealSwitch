@@ -125,7 +125,7 @@ open class DayNightModeCRSwitch(builder: Builder) :
             })
         }
 
-        val iv = createImageView(applicationContext)
+        val iv = createImageView(activity.get() ?: applicationContext)
         val radius = calcRadius(x, y)
 
         val animation = if (toNightMode) animToNightMode else animToDayMode

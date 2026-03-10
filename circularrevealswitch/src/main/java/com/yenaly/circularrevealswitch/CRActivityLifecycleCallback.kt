@@ -2,10 +2,8 @@ package com.yenaly.circularrevealswitch
 
 import android.app.Activity
 import android.app.Application
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import java.lang.ref.WeakReference
 
 /**
  * This is an implementation of the ActivityLifecycleCallbacks interface.

@@ -112,7 +112,7 @@ open class ThemeCRSwitch(builder: Builder) :
      * @param screenshot The screenshot to use for the animation.
      */
     protected open fun animateTheme(screenshot: Bitmap) {
-        val iv = createImageView(applicationContext)
+        val iv = createImageView(activity.get() ?: applicationContext)
         val radius = calcRadius(x, y)
 
         if (animToTheme === SwitchAnimation.SHRINK) {
@@ -137,7 +137,7 @@ open class ThemeCRSwitch(builder: Builder) :
      */
     open class Builder(
         view: View,
-        @StyleRes @JvmField val toTheme: Int,
+        @param:StyleRes @JvmField val toTheme: Int,
     ) : CRSwitchBuilder<Builder>(view) {
 
         @JvmField

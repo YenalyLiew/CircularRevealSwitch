@@ -32,6 +32,8 @@ import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.hypot
+import androidx.core.graphics.createBitmap
+import kotlinx.coroutines.Runnable
 
 /**
  * This class is used to create a circular reveal switch animation.
@@ -52,10 +54,15 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
 
         @Suppress("KotlinConstantConditions")
         internal const val DEBUG = BuildConfig.ENABLE_LOGGING
-
-        @JvmStatic
-        protected var isViewClickable = true
     }
+
+    /**
+     * This variable is used as a watchdog for the expand animation.
+     */
+    private var expandWatchdog: Runnable? = null
+
+    // This variable is used to prevent multiple clicks on the view while the animation is running
+    protected var isViewClickable = true
 
     // Interpolator for the animation
     @JvmField
@@ -73,7 +80,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
     // The context of the view
     // after recreating the view, the context reference might be lost
     @JvmField
-    protected val context: WeakReference<Context> = view.get()!!.context.weak()
+    protected var context: WeakReference<Context> = view.get()!!.context.weak()
 
     // The application context of the context
     @JvmField
@@ -160,6 +167,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
         application.registerActivityLifecycleCallbacks(
             CRActivityLifecycleCallback(activityName, taskUuid) { newActivity ->
                 this.activity = newActivity.weak()
+                this.context = newActivity.weak()
                 this.window = newActivity.window
                 this.decorView = newActivity.window.decorView as ViewGroup
                 if (DEBUG) {
@@ -204,7 +212,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
         val root = decorView.rootView
         val thread = HandlerThread("Screenshot")
         try {
-            val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+            val bitmap = createBitmap(root.width, root.height)
             thread.start()
             var isSuccess = false
             val latch = CountDownLatch(1)
@@ -263,6 +271,7 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            isClickable = true
         }
     }
 
@@ -275,7 +284,10 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      */
     protected open fun animateShrink(iv: ImageView, screenshot: Bitmap, radius: Float) {
         iv.setImageBitmap(screenshot)
-        decorView.addView(iv, -1)
+
+        val contentIndex = decorView.indexOfChildById(android.R.id.content)
+        decorView.addView(iv, contentIndex + 1)
+
 
         if (DEBUG) {
             decorView.children.forEach {
@@ -328,7 +340,10 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
      */
     protected open fun animateExpand(iv: ImageView, screenshot: Bitmap, radius: Float) {
         iv.setImageBitmap(screenshot)
-        decorView.addView(iv, 0)
+
+        val content = decorView.findViewById<View>(android.R.id.content)
+        val contentIndex = decorView.indexOfChild(content)
+        decorView.addView(iv, contentIndex)
 
         if (DEBUG) {
             decorView.children.forEach {
@@ -336,8 +351,16 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
             }
         }
 
-        val content = decorView.findViewById<View>(android.R.id.content)
+        val watchdog = Runnable {
+            if (DEBUG) Log.e(TAG, "Expand animation watchdog triggered! Forcing visibility.")
+            content.isInvisible = false
+            if (iv.parent != null) decorView.removeView(iv)
+            isViewClickable = true
+        }
+        this.expandWatchdog = watchdog
+
         content.isInvisible = true
+        handler.postDelayed(watchdog, duration + 500)
 
         content.doOnAttach { view ->
             if (DEBUG) {
@@ -351,13 +374,15 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                 interpolator = this@CircularRevealSwitch.interpolator
                 duration = this@CircularRevealSwitch.duration
                 addListener(onStart = {
-                    isViewClickable = false
+                    handler.removeCallbacks(watchdog)
                     view.isInvisible = false
+                    isViewClickable = false
                     onExpandListener?.onAnimStart()
                     if (DEBUG) {
                         Log.d(TAG, "start_time: ${System.currentTimeMillis() - beforeStartTime} ms")
                     }
                 }, onEnd = {
+                    handler.removeCallbacks(watchdog)
                     isViewClickable = true
                     decorView.removeView(iv)
                     onExpandListener?.onAnimEnd()
@@ -370,6 +395,8 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
                         )
                     }
                 }, onCancel = {
+                    handler.removeCallbacks(watchdog)
+                    view.isInvisible = false
                     isViewClickable = true
                     decorView.removeView(iv)
                     onExpandListener?.onAnimCancel()
@@ -492,10 +519,13 @@ abstract class CircularRevealSwitch<T : CRSwitchBuilder<T>>(crSwitchBuilder: T) 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
             Lifecycle.Event.ON_DESTROY -> {
+                expandWatchdog?.let(handler::removeCallbacks)
                 clearListeners()
-                if (DEBUG) {
-                    Log.d(TAG, "listeners have been removed")
-                }
+                if (DEBUG) Log.d(TAG, "listeners and watchdogs removed")
+            }
+
+            Lifecycle.Event.ON_STOP -> {
+                expandWatchdog?.run()
             }
 
             else -> Unit

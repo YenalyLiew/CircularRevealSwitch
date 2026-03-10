@@ -52,13 +52,12 @@ object PixelCopyCompat {
             listener: PixelCopy.OnPixelCopyFinishedListener,
             listenerHandler: Handler,
         ) {
-            val insets = Rect()
-            val surface = sourceForWindow(window, insets)
+            val surface = findSurface(window)
             PixelCopy.request(surface, dest, listener, listenerHandler)
         }
 
         @SuppressLint("PrivateApi")
-        private fun sourceForWindow(source: Window?, outInsets: Rect): Surface {
+        private fun findSurface(source: Window?): Surface {
             requireNotNull(source) { "source is null" }
             requireNotNull(source.peekDecorView()) { "Only able to copy windows with decor views" }
             var surface: Surface? = null
@@ -76,24 +75,6 @@ object PixelCopyCompat {
                 surface = root.javaClass.getDeclaredField("mSurface").apply {
                     isAccessible = true
                 }[root] as Surface
-                val windowAttrs = root.javaClass.getDeclaredField("mWindowAttributes").apply {
-                    isAccessible = true
-                }[root] // as WindowManager.LayoutParams
-                val surfaceInsets = windowAttrs.javaClass.getDeclaredField("surfaceInsets").apply {
-                    isAccessible = true
-                }[windowAttrs] as Rect
-                // val width = root.javaClass.getDeclaredField("mWidth").apply {
-                //     isAccessible = true
-                // }[root] as Int
-                // val height = root.javaClass.getDeclaredField("mHeight").apply {
-                //     isAccessible = true
-                // }[root] as Int
-                val width = dv.rootView.width
-                val height = dv.rootView.height
-                outInsets.set(
-                    surfaceInsets.left, surfaceInsets.top,
-                    width + surfaceInsets.left, height + surfaceInsets.top
-                )
             }
             require(surface != null && surface.isValid) { "Window doesn't have a backing surface!" }
             return surface
